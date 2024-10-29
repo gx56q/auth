@@ -1,5 +1,4 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -8,10 +7,9 @@ namespace PhotosApp.Services
 {
     public static class TemporaryTokens
     {
-        public static SymmetricSecurityKey SigningKey =>
-            new SymmetricSecurityKey(Encoding.ASCII.GetBytes("Ne!0_0!vzlomayesh!^_^!nikogda!"));
-
         public const string CookieName = "TemporaryToken";
+
+        public static SymmetricSecurityKey SigningKey => new(Encoding.ASCII.GetBytes("Ne!0_0!vzlomayesh!^_^!nikogda!"));
 
         public static string GenerateEncoded()
         {

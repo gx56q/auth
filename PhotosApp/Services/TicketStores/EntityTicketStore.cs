@@ -65,6 +65,7 @@ namespace PhotosApp.Services.TicketStores
 
                     return DeserializeFromBytes(ticketEntity.Value);
                 }
+
                 return null;
             }
         }
@@ -76,14 +77,11 @@ namespace PhotosApp.Services.TicketStores
             {
                 UserId = userId,
                 LastActivity = DateTimeOffset.UtcNow,
-                Value = SerializeToBytes(ticket),
+                Value = SerializeToBytes(ticket)
             };
 
             var expiresUtc = ticket.Properties.ExpiresUtc;
-            if (expiresUtc.HasValue)
-            {
-                authenticationTicket.Expires = expiresUtc.Value;
-            }
+            if (expiresUtc.HasValue) authenticationTicket.Expires = expiresUtc.Value;
 
             using (var dbContext = new TicketsDbContext(dbContextOptions))
             {
@@ -95,9 +93,13 @@ namespace PhotosApp.Services.TicketStores
         }
 
         private byte[] SerializeToBytes(AuthenticationTicket source)
-            => TicketSerializer.Default.Serialize(source);
+        {
+            return TicketSerializer.Default.Serialize(source);
+        }
 
         private AuthenticationTicket DeserializeFromBytes(byte[] source)
-            => source == null ? null : TicketSerializer.Default.Deserialize(source);
+        {
+            return source == null ? null : TicketSerializer.Default.Deserialize(source);
+        }
     }
 }

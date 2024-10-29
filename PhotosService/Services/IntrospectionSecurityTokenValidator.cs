@@ -11,12 +11,13 @@ namespace PhotosService.Services
 {
     public class IntrospectionSecurityTokenValidator : ISecurityTokenValidator
     {
-        private readonly JwtSecurityTokenHandler tokenHandler;
-        private readonly string authorityAddress;
         private readonly string apiResourceId;
         private readonly string apiResourceSecret;
+        private readonly string authorityAddress;
+        private readonly JwtSecurityTokenHandler tokenHandler;
 
-        public IntrospectionSecurityTokenValidator(string authorityAddress, string apiResourceId, string apiResourceSecret)
+        public IntrospectionSecurityTokenValidator(string authorityAddress, string apiResourceId,
+            string apiResourceSecret)
         {
             tokenHandler = new JwtSecurityTokenHandler();
             this.authorityAddress = authorityAddress;
@@ -28,7 +29,10 @@ namespace PhotosService.Services
 
         public int MaximumTokenSizeInBytes { get; set; } = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
-        public bool CanReadToken(string securityToken) => tokenHandler.CanReadToken(securityToken);
+        public bool CanReadToken(string securityToken)
+        {
+            return tokenHandler.CanReadToken(securityToken);
+        }
 
         public ClaimsPrincipal ValidateToken(
             string securityToken,
@@ -37,16 +41,16 @@ namespace PhotosService.Services
         {
             // NOTE: стандартная проверка токена, чтобы не проверять на сервере авторизации заведомо некорректные токены
             var principal = tokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
-            
+
             // NOTE: проверка токена через сервер авторизации
             var (isActive, _) = IntrospectTokenAsync(securityToken).Result;
             if (!isActive)
                 throw new TokenNotActiveException();
-            
+
             return principal;
         }
 
-        async Task<(bool isActive, Claim[] claims)> IntrospectTokenAsync(string securityToken)
+        private async Task<(bool isActive, Claim[] claims)> IntrospectTokenAsync(string securityToken)
         {
             var client = new HttpClient();
 
@@ -66,8 +70,8 @@ namespace PhotosService.Services
 
             if (response.IsError)
                 throw new TokenIntrospectionException(response.Error);
-            
-            
+
+
             return (
                 isActive: response.IsActive, // NOTE: Не прошло ли время действия токена? Не отозван ли он?
                 claims: response.Claims.ToArray() // NOTE: Сервер авторизации расшифровывает содержимое токена

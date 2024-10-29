@@ -1,11 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
-using PhotosApp.Clients.Exceptions;
-using PhotosApp.Clients.Models;
-using PhotosApp.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -13,14 +6,21 @@ using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using AutoMapper;
+using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
+using PhotosApp.Clients.Exceptions;
+using PhotosApp.Clients.Models;
+using PhotosApp.Data;
 using MediaTypeHeaderValue = System.Net.Http.Headers.MediaTypeHeaderValue;
 
 namespace PhotosApp.Clients
 {
     public class RemotePhotosRepository : IPhotosRepository
     {
-        private readonly string serviceUrl;
         private readonly IMapper mapper;
+        private readonly string serviceUrl;
 
         public RemotePhotosRepository(IOptions<PhotosServiceOptions> options, IMapper mapper)
         {
@@ -32,7 +32,7 @@ namespace PhotosApp.Clients
         {
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
-            request.RequestUri = BuildUri($"/api/photos", $"ownerId={UrlEncode(ownerId)}");
+            request.RequestUri = BuildUri("/api/photos", $"ownerId={UrlEncode(ownerId)}");
             request.Headers.Add(HeaderNames.Accept, MediaTypeNames.Application.Json);
 
             var response = await SendAsync(request);
@@ -105,12 +105,12 @@ namespace PhotosApp.Clients
                     throw new UnexpectedStatusCodeException(response.StatusCode);
             }
         }
-        
+
         public async Task<bool> AddPhotoAsync(string title, string ownerId, byte[] content)
         {
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Post;
-            request.RequestUri = BuildUri($"/api/photos");
+            request.RequestUri = BuildUri("/api/photos");
             request.Headers.Add(HeaderNames.Accept, MediaTypeNames.Application.Json);
             request.Content = SerializeToJsonContent(new PhotoToAddDto
             {
@@ -185,12 +185,18 @@ namespace PhotosApp.Clients
         }
 
         private Uri BuildUri(string path, string query = null)
-            => new UriBuilder(serviceUrl) { Path = path, Query = query }.Uri;
-        private string UrlEncode(object arg) => arg != null ? HttpUtility.UrlEncode(arg.ToString()) : null;
+        {
+            return new UriBuilder(serviceUrl) { Path = path, Query = query }.Uri;
+        }
+
+        private string UrlEncode(object arg)
+        {
+            return arg != null ? HttpUtility.UrlEncode(arg.ToString()) : null;
+        }
 
         private static ByteArrayContent SerializeToJsonContent(object obj)
         {
-            string json = JsonConvert.SerializeObject(obj);
+            var json = JsonConvert.SerializeObject(obj);
             var bytes = Encoding.UTF8.GetBytes(json);
             var content = new ByteArrayContent(bytes);
             content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Json);

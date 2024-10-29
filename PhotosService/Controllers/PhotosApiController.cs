@@ -13,8 +13,8 @@ namespace PhotosService.Controllers
     [Route("api/photos")]
     public class PhotosApiController : Controller
     {
-        private readonly IPhotosRepository photosRepository;
         private readonly IMapper mapper;
+        private readonly IPhotosRepository photosRepository;
 
         public PhotosApiController(IPhotosRepository photosRepository, IMapper mapper)
         {
@@ -27,7 +27,7 @@ namespace PhotosService.Controllers
         {
             var photoEntities = (await photosRepository.GetPhotosAsync(ownerId)).ToList();
             var photos = mapper.Map<List<PhotoDto>>(photoEntities);
-            foreach(var photo in photos)
+            foreach (var photo in photos)
                 photo.Url = GeneratePhotoUrl(photo);
             return Ok(photos.ToList());
         }
@@ -93,7 +93,8 @@ namespace PhotosService.Controllers
 
         private string GeneratePhotoUrl(PhotoDto photo)
         {
-            var relativeUrl = Url.Action(nameof(GetPhotoContent), new {
+            var relativeUrl = Url.Action(nameof(GetPhotoContent), new
+            {
                 id = photo.Id
             });
             var url = "https://localhost:6001" + relativeUrl;

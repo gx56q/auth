@@ -1,19 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace PhotosService.Data
 {
     public class LocalPhotosRepository : IPhotosRepository, IDisposable
     {
-        PhotosDbContext dbContext;
+        private PhotosDbContext dbContext;
 
         public LocalPhotosRepository(PhotosDbContext dbContext)
         {
             this.dbContext = dbContext;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public async Task<IEnumerable<PhotoEntity>> GetPhotosAsync(string ownerId)
@@ -61,15 +67,6 @@ namespace PhotosService.Data
             return await dbContext.SaveChangesAsync() >= 0;
         }
 
-        private async Task<string> SavePhotoContentAsync(byte[] content)
-        {
-            var fileExtension = ImageHelpers.GetExtensionByBytes(content);
-            var fileName = $"{Guid.NewGuid()}.new.{fileExtension}";
-            var filePath = GetPhotoPath(fileName);
-            await File.WriteAllBytesAsync(filePath, content);
-            return fileName;
-        }
-
         public async Task<bool> UpdatePhotoAsync(PhotoEntity photo)
         {
             dbContext.Photos.Update(photo);
@@ -82,22 +79,23 @@ namespace PhotosService.Data
             return await dbContext.SaveChangesAsync() >= 0;
         }
 
-        public void Dispose()
+        private async Task<string> SavePhotoContentAsync(byte[] content)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            var fileExtension = ImageHelpers.GetExtensionByBytes(content);
+            var fileName = $"{Guid.NewGuid()}.new.{fileExtension}";
+            var filePath = GetPhotoPath(fileName);
+            await File.WriteAllBytesAsync(filePath, content);
+            return fileName;
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
-            {
                 if (dbContext != null)
                 {
                     dbContext.Dispose();
                     dbContext = null;
                 }
-            }
         }
 
         private static string GetPhotoPath(string fileName)

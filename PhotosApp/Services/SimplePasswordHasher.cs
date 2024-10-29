@@ -15,31 +15,31 @@ namespace PhotosApp.Services
 
         public string HashPassword(TUser user, string password)
         {
-            byte[] saltBytes = GenerateSaltBytes();
-            byte[] hashBytes = GetHashBytes(password, saltBytes);
-            byte[] hashedPasswordBytes = ConcatenateBytes(saltBytes, hashBytes);
-            string hashedPassword = Convert.ToBase64String(hashedPasswordBytes);
+            var saltBytes = GenerateSaltBytes();
+            var hashBytes = GetHashBytes(password, saltBytes);
+            var hashedPasswordBytes = ConcatenateBytes(saltBytes, hashBytes);
+            var hashedPassword = Convert.ToBase64String(hashedPasswordBytes);
             return hashedPassword;
         }
 
         public PasswordVerificationResult VerifyHashedPassword(TUser user,
             string hashedPassword, string providedPassword)
         {
-            byte[] hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
+            var hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
 
-            byte[] saltBytes = new byte[SaltSizeInBits / 8];
+            var saltBytes = new byte[SaltSizeInBits / 8];
             Buffer.BlockCopy(
                 hashedPasswordBytes, 0,
                 saltBytes, 0,
                 saltBytes.Length);
 
-            byte[] expectedHashBytes = new byte[HashSizeInBits / 8];
+            var expectedHashBytes = new byte[HashSizeInBits / 8];
             Buffer.BlockCopy(
                 hashedPasswordBytes, saltBytes.Length,
                 expectedHashBytes, 0,
                 expectedHashBytes.Length);
 
-            byte[] actualHashBytes = GetHashBytes(providedPassword, saltBytes);
+            var actualHashBytes = GetHashBytes(providedPassword, saltBytes);
 
             // Если providedPassword корректен, то в результате хэширования его с той же самой солью,
             // что и оригинальный пароль, должен получаться тот же самый хэш.
@@ -50,28 +50,29 @@ namespace PhotosApp.Services
 
         private byte[] GenerateSaltBytes()
         {
-            byte[] saltBytes = new byte[SaltSizeInBits / 8];
+            var saltBytes = new byte[SaltSizeInBits / 8];
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(saltBytes);
             }
+
             return saltBytes;
         }
 
         private static byte[] GetHashBytes(string password, byte[] saltBytes)
         {
             return KeyDerivation.Pbkdf2(
-                password: password,
-                salt: saltBytes,
-                prf: KeyDerivationPrf.HMACSHA1,
-                iterationCount: 10000,
-                numBytesRequested: HashSizeInBits / 8);
+                password,
+                saltBytes,
+                KeyDerivationPrf.HMACSHA1,
+                10000,
+                HashSizeInBits / 8);
         }
 
         private static byte[] ConcatenateBytes(byte[] leftBytes, byte[] rightBytes)
         {
             var resultBytes = new byte[leftBytes.Length + rightBytes.Length];
-            
+
             Buffer.BlockCopy(
                 leftBytes, 0, // байты источника и позиция в них
                 resultBytes, 0, // байты назначения и начальная позиция в них
@@ -81,7 +82,7 @@ namespace PhotosApp.Services
                 rightBytes, 0, // байты источника и позиция в них
                 resultBytes, leftBytes.Length, // байты назначения и начальная позиция в них
                 rightBytes.Length); // количество байтов, которое надо скопировать
-            
+
             return resultBytes;
         }
 
@@ -94,7 +95,7 @@ namespace PhotosApp.Services
 
             var areSame = true;
             for (var i = 0; i < a.Length; i++)
-                areSame &= (a[i] == b[i]);
+                areSame &= a[i] == b[i];
             return areSame;
         }
     }
@@ -102,16 +103,16 @@ namespace PhotosApp.Services
     [TestFixture]
     public class SimplePasswordHasherSpecification
     {
-        private SimplePasswordHasher<IdentityUser> hasher;
-        private readonly IdentityUser emptyUser = new IdentityUser();
-        private readonly string correctPassword = "correct";
-        private readonly string incorrectPassword = "incorrect";
-
         [SetUp]
         public void SetUp()
         {
             hasher = new SimplePasswordHasher<IdentityUser>();
         }
+
+        private SimplePasswordHasher<IdentityUser> hasher;
+        private readonly IdentityUser emptyUser = new();
+        private readonly string correctPassword = "correct";
+        private readonly string incorrectPassword = "incorrect";
 
         [Test]
         public void HashPassword_ShouldGenerateHash()

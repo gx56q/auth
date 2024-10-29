@@ -12,8 +12,8 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
 {
     public class ExternalLoginsModel : PageModel
     {
-        private readonly UserManager<PhotosAppUser> _userManager;
         private readonly SignInManager<PhotosAppUser> _signInManager;
+        private readonly UserManager<PhotosAppUser> _userManager;
 
         public ExternalLoginsModel(
             UserManager<PhotosAppUser> userManager,
@@ -29,16 +29,12 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
 
         public bool ShowRemoveButton { get; set; }
 
-        [TempData]
-        public string StatusMessage { get; set; }
+        [TempData] public string StatusMessage { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID 'user.Id'.");
-            }
+            if (user == null) return NotFound("Unable to load user with ID 'user.Id'.");
 
             CurrentLogins = await _userManager.GetLoginsAsync(user);
             OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
@@ -51,10 +47,7 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPostRemoveLoginAsync(string loginProvider, string providerKey)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID 'user.Id'.");
-            }
+            if (user == null) return NotFound("Unable to load user with ID 'user.Id'.");
 
             var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
             if (!result.Succeeded)
@@ -74,29 +67,28 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             // Request a redirect to the external login provider to link a login for the current user
-            var redirectUrl = Url.Page("./ExternalLogins", pageHandler: "LinkLoginCallback");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
+            var redirectUrl = Url.Page("./ExternalLogins", "LinkLoginCallback");
+            var properties =
+                _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl,
+                    _userManager.GetUserId(User));
             return new ChallengeResult(provider, properties);
         }
 
         public async Task<IActionResult> OnGetLinkLoginCallbackAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID 'user.Id'.");
-            }
+            if (user == null) return NotFound("Unable to load user with ID 'user.Id'.");
 
             var info = await _signInManager.GetExternalLoginInfoAsync(user.Id);
             if (info == null)
-            {
-                throw new InvalidOperationException($"Unexpected error occurred loading external login info for user with ID '{user.Id}'.");
-            }
+                throw new InvalidOperationException(
+                    $"Unexpected error occurred loading external login info for user with ID '{user.Id}'.");
 
             var result = await _userManager.AddLoginAsync(user, info);
             if (!result.Succeeded)
             {
-                StatusMessage = "The external login was not added. External logins can only be associated with one account.";
+                StatusMessage =
+                    "The external login was not added. External logins can only be associated with one account.";
                 return RedirectToPage();
             }
 

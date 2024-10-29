@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using System.Reflection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,14 +16,14 @@ namespace PhotosApp
 {
     public class Startup
     {
-        private IWebHostEnvironment env { get; }
-        private IConfiguration configuration { get; }
-
         public Startup(IWebHostEnvironment env, IConfiguration configuration)
         {
             this.env = env;
             this.configuration = configuration;
         }
+
+        private IWebHostEnvironment env { get; }
+        private IConfiguration configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -40,7 +40,7 @@ namespace PhotosApp
             services.AddHttpContextAccessor();
 
             var connectionString = configuration.GetConnectionString("PhotosDbContextConnection")
-                ?? "Data Source=PhotosApp.db";
+                                   ?? "Data Source=PhotosApp.db";
             services.AddDbContext<PhotosDbContext>(o => o.UseSqlite(connectionString));
             // NOTE: Вместо Sqlite можно использовать LocalDB от Microsoft или другой SQL Server
             //services.AddDbContext<PhotosDbContext>(o =>
@@ -57,7 +57,7 @@ namespace PhotosApp
                     .ForMember(m => m.FileName, options => options.Ignore())
                     .ForMember(m => m.Id, options => options.Ignore())
                     .ForMember(m => m.OwnerId, options => options.Ignore());
-            }, new System.Reflection.Assembly[0]);
+            }, new Assembly[0]);
 
             services.AddTransient<ICookieManager, ChunkingCookieManager>();
         }

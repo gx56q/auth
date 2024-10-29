@@ -10,12 +10,14 @@ namespace PhotosService.Services
 {
     public static class SignedUrlHelpers
     {
-        private static readonly Lazy<string> privateKeyXmlString = new Lazy<string>(LoadPrivateKeyXmlString);
+        private static readonly Lazy<string> privateKeyXmlString = new(LoadPrivateKeyXmlString);
+
+        private static readonly DateTime UnixTimeStart = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static string CreateSignedUrl(string resourceUrl, DateTime startUtc, DateTime endUtc)
         {
             var urlBuilder = new UriBuilder(resourceUrl);
-            
+
             var policyString = CreatePolicyString(urlBuilder.ToString(), startUtc, endUtc);
             var policyBytes = Encoding.ASCII.GetBytes(policyString);
             var policyUrlSafeString = ToUrlSafeBase64String(policyBytes);
@@ -37,7 +39,7 @@ namespace PhotosService.Services
             var queryStringCollection = HttpUtility.ParseQueryString(urlBuilder.Query);
 
             var expectedSignatureBytes = FromUrlSafeBase64String(queryStringCollection["signature"]);
-            
+
             var policyBytes = FromUrlSafeBase64String(queryStringCollection["policy"]);
             var actualSignatureBytes = CreateSignedHash(policyBytes);
             var policyString = Encoding.ASCII.GetString(policyBytes);
@@ -84,7 +86,9 @@ namespace PhotosService.Services
         {
             byte[] hash = null;
             using (var cryptoSHA1 = new SHA1CryptoServiceProvider())
+            {
                 hash = cryptoSHA1.ComputeHash(content);
+            }
 
             var rsaProvider = new RSACryptoServiceProvider();
             rsaProvider.FromXmlString(privateKeyXmlString.Value);
@@ -124,9 +128,10 @@ namespace PhotosService.Services
             return Convert.FromBase64String(base64String);
         }
 
-        private static readonly DateTime UnixTimeStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        private static int ToUnixTimestamp(DateTime dateTime) => (int)((dateTime - UnixTimeStart).TotalSeconds);
+        private static int ToUnixTimestamp(DateTime dateTime)
+        {
+            return (int)(dateTime - UnixTimeStart).TotalSeconds;
+        }
 
         private static bool AreByteArraysEqual(byte[] a, byte[] b)
         {
@@ -137,7 +142,7 @@ namespace PhotosService.Services
 
             var areSame = true;
             for (var i = 0; i < a.Length; i++)
-                areSame &= (a[i] == b[i]);
+                areSame &= a[i] == b[i];
             return areSame;
         }
 

@@ -12,12 +12,12 @@ namespace IdentityServer
 {
     public class Startup
     {
-        public IWebHostEnvironment Environment { get; }
-
         public Startup(IWebHostEnvironment environment)
         {
             Environment = environment;
         }
+
+        public IWebHostEnvironment Environment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -36,10 +36,7 @@ namespace IdentityServer
 
         public void Configure(IApplicationBuilder app)
         {
-            if (Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            if (Environment.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             // uncomment if you want to add MVC
             //app.UseStaticFiles();

@@ -13,13 +13,13 @@ namespace PhotosApp.Services
     // необходимо разрешить "Небезопасные приложения" https://myaccount.google.com/lesssecureapps
     public class SimpleEmailSender : IEmailSender
     {
-        private readonly ILogger<SimpleEmailSender> logger;
+        private readonly bool enableSSL;
         private readonly IWebHostEnvironment env;
         private readonly string host;
-        private readonly int port;
-        private readonly bool enableSSL;
-        private readonly string userName;
+        private readonly ILogger<SimpleEmailSender> logger;
         private readonly string password;
+        private readonly int port;
+        private readonly string userName;
 
         public SimpleEmailSender(ILogger<SimpleEmailSender> logger,
             IWebHostEnvironment hostingEnvironment,
@@ -27,7 +27,7 @@ namespace PhotosApp.Services
             string userName, string password)
         {
             this.logger = logger;
-            this.env = hostingEnvironment;
+            env = hostingEnvironment;
             this.host = host;
             this.port = port;
             this.enableSSL = enableSSL;

@@ -28,10 +28,7 @@ namespace PhotosApp.Services.TicketStores
         {
             var options = new MemoryCacheEntryOptions();
             var expiresUtc = ticket.Properties.ExpiresUtc;
-            if (expiresUtc.HasValue)
-            {
-                options.SetAbsoluteExpiration(expiresUtc.Value);
-            }
+            if (expiresUtc.HasValue) options.SetAbsoluteExpiration(expiresUtc.Value);
             options.SetSlidingExpiration(TimeSpan.FromHours(1));
 
             cache.Set(key, ticket, options);

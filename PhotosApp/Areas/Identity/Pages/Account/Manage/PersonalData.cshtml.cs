@@ -9,8 +9,8 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
 {
     public class PersonalDataModel : PageModel
     {
-        private readonly UserManager<PhotosAppUser> _userManager;
         private readonly ILogger<PersonalDataModel> _logger;
+        private readonly UserManager<PhotosAppUser> _userManager;
 
         public PersonalDataModel(
             UserManager<PhotosAppUser> userManager,
@@ -23,10 +23,7 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnGet()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+            if (user == null) return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
 
             return Page();
         }

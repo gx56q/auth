@@ -1,4 +1,4 @@
-using AutoMapper;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -14,54 +14,42 @@ namespace PhotosService
 {
     public class Startup
     {
-        private IWebHostEnvironment env { get; }
-        private IConfiguration configuration { get; }
-
         public Startup(IWebHostEnvironment env, IConfiguration configuration)
         {
             this.env = env;
             this.configuration = configuration;
         }
 
+        private IWebHostEnvironment env { get; }
+        private IConfiguration configuration { get; }
+
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(options =>
-            {
-                options.ReturnHttpNotAcceptable = true;
-            })
-            .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            });
+            services.AddControllers(options => { options.ReturnHttpNotAcceptable = true; })
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
 
             var connectionString = configuration.GetConnectionString("PhotosDbContextConnection")
-                ?? "Data Source=PhotosService.db";
+                                   ?? "Data Source=PhotosService.db";
             services.AddDbContext<PhotosDbContext>(o => o.UseSqlite(connectionString));
 
             services.AddScoped<IPhotosRepository, LocalPhotosRepository>();
 
-            services.AddAutoMapper(cfg =>
-            {
-                cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap();
-            }, new System.Reflection.Assembly[0]);
+            services.AddAutoMapper(cfg => { cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap(); }, new Assembly[0]);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseHttpsRedirection();
 
             app.UseSerilogRequestLogging();
 
             app.UseRouting();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

@@ -8,25 +8,22 @@ namespace PhotosApp.Migrations.TicketsDb
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Tickets",
-                columns: table => new
+                "Tickets",
+                table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Value = table.Column<byte[]>(type: "BLOB", nullable: true),
-                    LastActivity = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    Expires = table.Column<DateTimeOffset>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>("TEXT", nullable: false),
+                    UserId = table.Column<Guid>("TEXT", nullable: false),
+                    Value = table.Column<byte[]>("BLOB", nullable: true),
+                    LastActivity = table.Column<DateTimeOffset>("TEXT", nullable: true),
+                    Expires = table.Column<DateTimeOffset>("TEXT", nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tickets", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Tickets", x => x.Id); });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Tickets");
+                "Tickets");
         }
     }
 }

@@ -14,7 +14,7 @@ namespace PhotosApp.Controllers
             var encodedJwt = TemporaryTokens.GenerateEncoded();
 
             Response.Cookies.Append(TemporaryTokens.CookieName, encodedJwt,
-                new CookieOptions {HttpOnly = true});
+                new CookieOptions { HttpOnly = true });
             return Content(encodedJwt);
         }
 
