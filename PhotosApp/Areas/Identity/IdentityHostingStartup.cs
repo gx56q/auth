@@ -100,8 +100,8 @@ namespace PhotosApp.Areas.Identity
                     //    options.ClientSecret = context.Configuration["Authentication:Google:ClientSecret"];
                     //})
                     .AddOpenIdConnect(
-                        authenticationScheme: "Google",
-                        displayName: "Google",
+                        "Google",
+                        "Google",
                         options =>
                         {
                             options.Authority = "https://accounts.google.com/";
@@ -135,7 +135,8 @@ namespace PhotosApp.Areas.Identity
                         options.TokenValidationParameters.ValidateIssuer = true; // проверка издателя
                         options.TokenValidationParameters.ValidateAudience = true; // проверка получателя
                         options.TokenValidationParameters.ValidateLifetime = true; // проверка не протух ли
-                        options.TokenValidationParameters.RequireSignedTokens = true; // есть ли валидная подпись издателя
+                        options.TokenValidationParameters.RequireSignedTokens =
+                            true; // есть ли валидная подпись издателя
                     });
 
                 services.AddAuthentication()
@@ -165,8 +166,8 @@ namespace PhotosApp.Areas.Identity
                 services.AddAuthorization(options =>
                 {
                     options.DefaultPolicy = new AuthorizationPolicyBuilder(
-                        JwtBearerDefaults.AuthenticationScheme,
-                        IdentityConstants.ApplicationScheme)
+                            JwtBearerDefaults.AuthenticationScheme,
+                            IdentityConstants.ApplicationScheme)
                         .RequireAuthenticatedUser()
                         .Build();
                     options.AddPolicy(

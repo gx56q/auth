@@ -37,10 +37,7 @@ namespace PhotosService
 
             services.AddScoped<IPhotosRepository, LocalPhotosRepository>();
 
-            services.AddAutoMapper(cfg =>
-            {
-                cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap();
-            }, new System.Reflection.Assembly[0]);
+            services.AddAutoMapper(cfg => { cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap(); }, new Assembly[0]);
 
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
@@ -61,10 +58,7 @@ namespace PhotosService
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

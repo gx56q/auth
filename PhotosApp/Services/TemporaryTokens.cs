@@ -16,11 +16,11 @@ namespace PhotosApp.Services
         {
             var claims = new Claim[]
             {
-                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Temporary Dev"),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, "Dev"),
+                new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+                new(ClaimsIdentity.DefaultNameClaimType, "Temporary Dev"),
+                new(ClaimsIdentity.DefaultRoleClaimType, "Dev")
             };
- 
+
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
                 claims: claims,
