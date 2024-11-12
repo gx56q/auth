@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PhotosApp.Areas.Identity;
 using PhotosApp.Areas.Identity.Data;
 using PhotosApp.Services;
@@ -22,6 +24,17 @@ namespace PhotosApp.Areas.Identity
         {
             builder.ConfigureServices((context, services) =>
             {
+                services.AddTransient<IEmailSender, SimpleEmailSender>(serviceProvider =>
+                    new SimpleEmailSender(
+                        serviceProvider.GetRequiredService<ILogger<SimpleEmailSender>>(),
+                        serviceProvider.GetRequiredService<IWebHostEnvironment>(),
+                        context.Configuration["SimpleEmailSender:Host"],
+                        context.Configuration.GetValue<int>("SimpleEmailSender:Port"),
+                        context.Configuration.GetValue<bool>("SimpleEmailSender:EnableSSL"),
+                        context.Configuration["SimpleEmailSender:UserName"],
+                        context.Configuration["SimpleEmailSender:Password"]
+                    ));
+
                 services.AddDbContext<UsersDbContext>(options =>
                     options.UseSqlite(
                         context.Configuration.GetConnectionString("UsersDbContextConnection")));
