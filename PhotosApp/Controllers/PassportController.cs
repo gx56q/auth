@@ -19,7 +19,6 @@ namespace PhotosApp.Controllers
                 : null;
 
             return Challenge(properties);
-
         }
 
         [Authorize]

@@ -41,7 +41,7 @@ namespace PhotosApp
             services.AddRazorPages();
             if (Env.IsDevelopment())
                 mvc.AddRazorRuntimeCompilation();
-            
+
             services.AddHttpContextAccessor();
 
             var connectionString = Configuration.GetConnectionString("PhotosDbContextConnection")

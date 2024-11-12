@@ -37,7 +37,7 @@ namespace PhotosService
                             .AllowAnyMethod();
                     });
             });
-            
+
             services.AddControllers(options =>
                 {
                     options.ReturnHttpNotAcceptable = true;
@@ -54,7 +54,8 @@ namespace PhotosService
 
             services.AddScoped<IPhotosRepository, LocalPhotosRepository>();
 
-            services.AddAutoMapper(cfg => { cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap(); }, Array.Empty<Assembly>());
+            services.AddAutoMapper(cfg => { cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap(); },
+                Array.Empty<Assembly>());
 
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>

@@ -99,7 +99,7 @@ namespace IdentityServer
                     RequirePkce = true,
 
                     AllowedGrantTypes = GrantTypes.Code,
-                    
+
                     // NOTE: показывать ли пользователю страницу consent со списком запрошенных разрешений
                     RequireConsent = false,
 
@@ -131,7 +131,7 @@ namespace IdentityServer
                     // NOTE: refresh token точно не будет использоваться
                     AllowOfflineAccess = false,
 
-                    AccessTokenLifetime = 2*60,
+                    AccessTokenLifetime = 2 * 60
                 }
             };
     }

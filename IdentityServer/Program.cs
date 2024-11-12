@@ -3,6 +3,7 @@
 
 
 using System;
+using IdentityServer.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -34,6 +35,8 @@ namespace IdentityServer
                 var hostBuilder = CreateHostBuilder(args);
                 Log.Information("Building web host");
                 var host = hostBuilder.Build();
+                Log.Information("Preparing data");
+                host.PrepareData();
                 Log.Information("Running web host");
                 host.Run();
                 return 0;

@@ -36,7 +36,7 @@ namespace PhotosService.Data
                     return "jpg";
             }
         }
-        
+
         private static string GetContentTypeByBytes(byte[] content)
         {
             try

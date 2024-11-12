@@ -78,7 +78,7 @@ namespace PhotosService.Controllers
             var check = SignedUrlHelpers.CheckSignedUrl(currentUrl);
             if (!check)
                 return Forbid();
-            
+
             var photoEntity = await _photosRepository.GetPhotoMetaAsync(id);
             if (photoEntity == null)
                 return NotFound();
@@ -138,7 +138,8 @@ namespace PhotosService.Controllers
 
         private string GeneratePhotoUrl(PhotoDto photo)
         {
-            var relativeUrl = Url.Action(nameof(GetPhotoSignedContent), new {
+            var relativeUrl = Url.Action(nameof(GetPhotoSignedContent), new
+            {
                 id = photo.Id
             });
             var url = "https://localhost:6001" + relativeUrl;
