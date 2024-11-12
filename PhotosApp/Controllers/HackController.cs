@@ -6,9 +6,10 @@ using PhotosApp.Services;
 
 namespace PhotosApp.Controllers
 {
+    [Route("hack")]
     public class HackController : Controller
     {
-        [HttpGet("hack/super_secret_qwe123")]
+        [HttpGet("super_secret_qwe123")]
         public IActionResult GenerateToken()
         {
             var encodedJwt = TemporaryTokens.GenerateEncoded();
@@ -19,7 +20,7 @@ namespace PhotosApp.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("hack/decode")]
+        [HttpGet("decode")]
         public IActionResult Decode()
         {
             return View();

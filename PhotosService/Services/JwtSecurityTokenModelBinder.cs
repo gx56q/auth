@@ -15,7 +15,6 @@ namespace PhotosService.Services
                 throw new ArgumentNullException(nameof(bindingContext));
 
             if (bindingContext.HttpContext.Items.TryGetValue(typeof(JwtSecurityTokenModelBinder), out var storedValue))
-                // NOTE: надеемся, что пришел не просто SecurityToken, а JwtSecurityToken
                 bindingContext.Result = ModelBindingResult.Success(storedValue as JwtSecurityToken);
             return Task.CompletedTask;
         }

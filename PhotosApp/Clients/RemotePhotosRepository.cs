@@ -26,21 +26,20 @@ namespace PhotosApp.Clients
 {
     public class RemotePhotosRepository : IPhotosRepository
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly IMapper mapper;
-        private readonly IMapper mapper;
-        private readonly IConfigurationManager<OpenIdConnectConfiguration> oidcConfigurationManager;
-        private readonly string serviceUrl;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMapper _mapper;
+        private readonly IConfigurationManager<OpenIdConnectConfiguration> _oidcConfigurationManager;
+        private readonly string _serviceUrl;
 
         public RemotePhotosRepository(IOptions<PhotosServiceOptions> options,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
             IConfigurationManager<OpenIdConnectConfiguration> oidcConfigurationManager)
         {
-            serviceUrl = options.Value.ServiceUrl;
-            this.mapper = mapper;
-            this.httpContextAccessor = httpContextAccessor;
-            this.oidcConfigurationManager = oidcConfigurationManager;
+            _serviceUrl = options.Value.ServiceUrl;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
+            _oidcConfigurationManager = oidcConfigurationManager;
         }
 
         public async Task<IEnumerable<PhotoEntity>> GetPhotosAsync(string ownerId)
@@ -57,11 +56,11 @@ namespace PhotosApp.Clients
                 case HttpStatusCode.OK:
                     var content = await response.Content.ReadAsStringAsync();
                     var photos = JsonConvert.DeserializeObject<PhotoDto[]>(content);
-                    return mapper.Map<PhotoEntity[]>(photos);
+                    return _mapper.Map<PhotoEntity[]>(photos);
                 case HttpStatusCode.NotFound:
                 case HttpStatusCode.Unauthorized:
                 case HttpStatusCode.Forbidden:
-                    return new PhotoEntity[0];
+                    return Array.Empty<PhotoEntity>();
                 default:
                     throw new UnexpectedStatusCodeException(response.StatusCode);
             }
@@ -81,7 +80,7 @@ namespace PhotosApp.Clients
                 case HttpStatusCode.OK:
                     var content = await response.Content.ReadAsStringAsync();
                     var photo = JsonConvert.DeserializeObject<PhotoDto>(content);
-                    return mapper.Map<PhotoEntity>(photo);
+                    return _mapper.Map<PhotoEntity>(photo);
                 case HttpStatusCode.NotFound:
                 case HttpStatusCode.Unauthorized:
                 case HttpStatusCode.Forbidden:
@@ -201,7 +200,7 @@ namespace PhotosApp.Clients
 
         private Uri BuildUri(string path, string query = null)
         {
-            return new UriBuilder(serviceUrl) { Path = path, Query = query }.Uri;
+            return new UriBuilder(_serviceUrl) { Path = path, Query = query }.Uri;
         }
 
         private string UrlEncode(object arg)
@@ -220,7 +219,7 @@ namespace PhotosApp.Clients
 
         private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
-            var httpContext = httpContextAccessor.HttpContext;
+            var httpContext = _httpContextAccessor.HttpContext;
 
             var accessToken = await httpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
             if (accessToken == null)
@@ -257,11 +256,11 @@ namespace PhotosApp.Clients
 
         private async Task<string> RefreshAccessTokenAsync(string refreshToken)
         {
-            var httpContext = httpContextAccessor.HttpContext;
+            var httpContext = _httpContextAccessor.HttpContext;
 
             // NOTE: получение конфигурации сервера авторизации
             // NOTE: если исходный запрос будет отменен, то использование RequestAborted отменит запрос конфигурации
-            var oidcConfiguration = await oidcConfigurationManager.GetConfigurationAsync(httpContext.RequestAborted);
+            var oidcConfiguration = await _oidcConfigurationManager.GetConfigurationAsync(httpContext.RequestAborted);
 
             // NOTE: запрос токенов с помощью IdentityModel
             var tokenResponse = await new HttpClient().RequestRefreshTokenAsync(new RefreshTokenRequest
@@ -289,8 +288,8 @@ namespace PhotosApp.Clients
 
         private async Task<TokenValidationResult> ValidateTokenAsync(string accessToken)
         {
-            var httpContext = httpContextAccessor.HttpContext;
-            var oidcConfiguration = await oidcConfigurationManager.GetConfigurationAsync(httpContext.RequestAborted);
+            var httpContext = _httpContextAccessor.HttpContext;
+            var oidcConfiguration = await _oidcConfigurationManager.GetConfigurationAsync(httpContext.RequestAborted);
             var issuerSigningKeys = oidcConfiguration.SigningKeys;
 
             var validationParameters = new TokenValidationParameters

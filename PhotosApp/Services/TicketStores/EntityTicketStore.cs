@@ -9,11 +9,11 @@ namespace PhotosApp.Services.TicketStores
 {
     public class EntityTicketStore : ITicketStore
     {
-        private readonly DbContextOptions<TicketsDbContext> dbContextOptions;
+        private readonly DbContextOptions<TicketsDbContext> _dbContextOptions;
 
         public EntityTicketStore(DbContextOptions<TicketsDbContext> dbContextOptions)
         {
-            this.dbContextOptions = dbContextOptions;
+            _dbContextOptions = dbContextOptions;
         }
 
         public async Task RemoveAsync(string key)
@@ -21,7 +21,7 @@ namespace PhotosApp.Services.TicketStores
             if (!Guid.TryParse(key, out var id))
                 return;
 
-            using (var dbContext = new TicketsDbContext(dbContextOptions))
+            await using (var dbContext = new TicketsDbContext(_dbContextOptions))
             {
                 var ticketEntity = await dbContext.Tickets.SingleOrDefaultAsync(x => x.Id == id);
                 if (ticketEntity != null)
@@ -37,7 +37,7 @@ namespace PhotosApp.Services.TicketStores
             if (!Guid.TryParse(key, out var id))
                 return;
 
-            using (var dbContext = new TicketsDbContext(dbContextOptions))
+            await using (var dbContext = new TicketsDbContext(_dbContextOptions))
             {
                 var ticketEntity = await dbContext.Tickets.FindAsync(id);
                 if (ticketEntity != null)
@@ -55,7 +55,7 @@ namespace PhotosApp.Services.TicketStores
             if (!Guid.TryParse(key, out var id))
                 return null;
 
-            using (var dbContext = new TicketsDbContext(dbContextOptions))
+            await using (var dbContext = new TicketsDbContext(_dbContextOptions))
             {
                 var ticketEntity = await dbContext.Tickets.FindAsync(id);
                 if (ticketEntity != null)
@@ -83,7 +83,7 @@ namespace PhotosApp.Services.TicketStores
             var expiresUtc = ticket.Properties.ExpiresUtc;
             if (expiresUtc.HasValue) authenticationTicket.Expires = expiresUtc.Value;
 
-            using (var dbContext = new TicketsDbContext(dbContextOptions))
+            await using (var dbContext = new TicketsDbContext(_dbContextOptions))
             {
                 await dbContext.Tickets.AddAsync(authenticationTicket);
                 await dbContext.SaveChangesAsync();

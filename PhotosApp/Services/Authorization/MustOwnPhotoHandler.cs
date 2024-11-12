@@ -10,33 +10,30 @@ namespace PhotosApp.Services.Authorization
 {
     public class MustOwnPhotoHandler : AuthorizationHandler<MustOwnPhotoRequirement>
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly IPhotosRepository photosRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPhotosRepository _photosRepository;
 
         public MustOwnPhotoHandler(IPhotosRepository photosRepository, IHttpContextAccessor httpContextAccessor)
         {
-            this.photosRepository = photosRepository;
-            this.httpContextAccessor = httpContextAccessor;
+            _photosRepository = photosRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context, MustOwnPhotoRequirement requirement)
         {
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // NOTE: IHttpContextAccessor позволяет получать HttpContext там, где это не получается сделать более явно.
-            var httpContext = httpContextAccessor.HttpContext;
-            // NOTE: RouteData содержит информацию о пути и параметрах запроса.
-            // Ее сформировал UseRouting и к моменту авторизации уже отработал.
+            var httpContext = _httpContextAccessor.HttpContext;
             var routeData = httpContext?.GetRouteData();
 
-            var photoIdString = routeData?.Values["id"].ToString();
+            var photoIdString = routeData?.Values["id"]?.ToString();
             if (!Guid.TryParse(photoIdString, out var photoId))
             {
                 context.Fail();
                 return;
             }
 
-            var photo = await photosRepository.GetPhotoMetaAsync(photoId);
+            var photo = await _photosRepository.GetPhotoMetaAsync(photoId);
 
             if (photo != null && photo.OwnerId == userId)
             {

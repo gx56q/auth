@@ -11,18 +11,18 @@ namespace PhotosService.Services
 {
     public class IntrospectionSecurityTokenValidator : ISecurityTokenValidator
     {
-        private readonly string apiResourceId;
-        private readonly string apiResourceSecret;
-        private readonly string authorityAddress;
-        private readonly JwtSecurityTokenHandler tokenHandler;
+        private readonly string _apiResourceId;
+        private readonly string _apiResourceSecret;
+        private readonly string _authorityAddress;
+        private readonly JwtSecurityTokenHandler _tokenHandler;
 
         public IntrospectionSecurityTokenValidator(string authorityAddress, string apiResourceId,
             string apiResourceSecret)
         {
-            tokenHandler = new JwtSecurityTokenHandler();
-            this.authorityAddress = authorityAddress;
-            this.apiResourceId = apiResourceId;
-            this.apiResourceSecret = apiResourceSecret;
+            _tokenHandler = new JwtSecurityTokenHandler();
+            _authorityAddress = authorityAddress;
+            _apiResourceId = apiResourceId;
+            _apiResourceSecret = apiResourceSecret;
         }
 
         public bool CanValidateToken => true;
@@ -31,7 +31,7 @@ namespace PhotosService.Services
 
         public bool CanReadToken(string securityToken)
         {
-            return tokenHandler.CanReadToken(securityToken);
+            return _tokenHandler.CanReadToken(securityToken);
         }
 
         public ClaimsPrincipal ValidateToken(
@@ -40,7 +40,7 @@ namespace PhotosService.Services
             out SecurityToken validatedToken)
         {
             // NOTE: стандартная проверка токена, чтобы не проверять на сервере авторизации заведомо некорректные токены
-            var principal = tokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
+            var principal = _tokenHandler.ValidateToken(securityToken, validationParameters, out validatedToken);
 
             // NOTE: проверка токена через сервер авторизации
             var (isActive, _) = IntrospectTokenAsync(securityToken).Result;
@@ -55,15 +55,15 @@ namespace PhotosService.Services
             var client = new HttpClient();
 
             // NOTE: запрашивается конфигурация сервера авторизации, внутри она кэшируется
-            var disco = await client.GetDiscoveryDocumentAsync(authorityAddress);
+            var disco = await client.GetDiscoveryDocumentAsync(_authorityAddress);
 
             var response = await client.IntrospectTokenAsync(new TokenIntrospectionRequest
             {
                 Address = disco.IntrospectionEndpoint,
                 // NOTE: хоть поле называется clientId, но это идентификатор ресурса, а не клиента
-                ClientId = apiResourceId,
+                ClientId = _apiResourceId,
                 // NOTE: для защиты от несанкционированных запросов на проверку токенов используется секрет ресурса
-                ClientSecret = apiResourceSecret,
+                ClientSecret = _apiResourceSecret,
 
                 Token = securityToken
             });

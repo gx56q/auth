@@ -11,12 +11,12 @@ using PhotosApp.Areas.Identity.Data;
 namespace PhotosApp.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
-    public class LoginWith2faModel : PageModel
+    public class LoginWith2FaModel : PageModel
     {
-        private readonly ILogger<LoginWith2faModel> _logger;
+        private readonly ILogger<LoginWith2FaModel> _logger;
         private readonly SignInManager<PhotosAppUser> _signInManager;
 
-        public LoginWith2faModel(SignInManager<PhotosAppUser> signInManager, ILogger<LoginWith2faModel> logger)
+        public LoginWith2FaModel(SignInManager<PhotosAppUser> signInManager, ILogger<LoginWith2FaModel> logger)
         {
             _signInManager = signInManager;
             _logger = logger;
@@ -80,10 +80,10 @@ namespace PhotosApp.Areas.Identity.Pages.Account
                 MinimumLength = 6)]
             [DataType(DataType.Text)]
             [Display(Name = "Authenticator code")]
-            public string TwoFactorCode { get; set; }
+            public string TwoFactorCode { get; init; }
 
             [Display(Name = "Remember this machine")]
-            public bool RememberMachine { get; set; }
+            public bool RememberMachine { get; init; }
         }
     }
 }

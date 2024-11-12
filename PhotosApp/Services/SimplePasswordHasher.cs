@@ -51,10 +51,8 @@ namespace PhotosApp.Services
         private byte[] GenerateSaltBytes()
         {
             var saltBytes = new byte[SaltSizeInBits / 8];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(saltBytes);
-            }
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(saltBytes);
 
             return saltBytes;
         }
@@ -106,49 +104,49 @@ namespace PhotosApp.Services
         [SetUp]
         public void SetUp()
         {
-            hasher = new SimplePasswordHasher<IdentityUser>();
+            _hasher = new SimplePasswordHasher<IdentityUser>();
         }
 
-        private SimplePasswordHasher<IdentityUser> hasher;
-        private readonly IdentityUser emptyUser = new();
-        private readonly string correctPassword = "correct";
-        private readonly string incorrectPassword = "incorrect";
+        private SimplePasswordHasher<IdentityUser> _hasher;
+        private readonly IdentityUser _emptyUser = new();
+        private readonly string _correctPassword = "correct";
+        private readonly string _incorrectPassword = "incorrect";
 
         [Test]
         public void HashPassword_ShouldGenerateHash()
         {
-            Assert.IsNotEmpty(hasher.HashPassword(emptyUser, correctPassword));
+            Assert.IsNotEmpty(_hasher.HashPassword(_emptyUser, _correctPassword));
         }
 
         [Test]
         public void HashPassword_ShouldGenerateDifferentHashes()
         {
-            var hash1 = hasher.HashPassword(emptyUser, correctPassword);
-            var hash2 = hasher.HashPassword(emptyUser, incorrectPassword);
+            var hash1 = _hasher.HashPassword(_emptyUser, _correctPassword);
+            var hash2 = _hasher.HashPassword(_emptyUser, _incorrectPassword);
             Assert.IsFalse(hash1.SequenceEqual(hash2));
         }
 
         [Test]
         public void HashPassword_ShouldGenerateHashesWithSalt()
         {
-            var hash1 = hasher.HashPassword(emptyUser, correctPassword);
-            var hash2 = hasher.HashPassword(emptyUser, correctPassword);
+            var hash1 = _hasher.HashPassword(_emptyUser, _correctPassword);
+            var hash2 = _hasher.HashPassword(_emptyUser, _correctPassword);
             Assert.IsFalse(hash1.SequenceEqual(hash2));
         }
 
         [Test]
         public void VerifyHashedPassword_ShouldReturnSuccess_WhenCorrectPassword()
         {
-            var hash = hasher.HashPassword(emptyUser, correctPassword);
-            var verificationResult = hasher.VerifyHashedPassword(emptyUser, hash, correctPassword);
+            var hash = _hasher.HashPassword(_emptyUser, _correctPassword);
+            var verificationResult = _hasher.VerifyHashedPassword(_emptyUser, hash, _correctPassword);
             Assert.AreEqual(PasswordVerificationResult.Success, verificationResult);
         }
 
         [Test]
         public void VerifyHashedPassword_ShouldReturnFailed_WhenIncorrectPassword()
         {
-            var hash = hasher.HashPassword(emptyUser, correctPassword);
-            var verificationResult = hasher.VerifyHashedPassword(emptyUser, hash, incorrectPassword);
+            var hash = _hasher.HashPassword(_emptyUser, _correctPassword);
+            var verificationResult = _hasher.VerifyHashedPassword(_emptyUser, hash, _incorrectPassword);
             Assert.AreEqual(PasswordVerificationResult.Failed, verificationResult);
         }
     }

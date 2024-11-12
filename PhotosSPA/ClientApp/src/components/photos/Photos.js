@@ -48,8 +48,24 @@ export class Photos extends Component {
             );
         }
 
-        return this.renderPhotos(this.state.photos);
-    }
+  // NOTE: Логика отрисовки информации про отдельную фотографию.
+  // Изначально показывается ID и имя файла в сервисе фотографий.
+  renderPhoto(photo) {
+    return (
+      <div key={photo.id} className="photoContainer">
+        <h3>{photo.title}</h3>
+        <ul>
+          <li>
+            <b>ID:</b> <span>{photo.id}</span>
+          </li>
+          <li>
+            <b>Файл:</b> <span>{photo.fileName}</span>
+          </li>
+          <img src={photo.url} className="photo" />
+        </ul>
+      </div>
+    );
+  }
 
     renderPhotos(photos) {
         return <div>{photos.map((photo) => this.renderPhoto(photo))}</div>;

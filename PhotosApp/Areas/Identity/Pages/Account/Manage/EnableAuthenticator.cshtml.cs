@@ -62,10 +62,10 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
             // Strip spaces and hypens
             var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
+            var is2FaTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
                 user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
-            if (!is2faTokenValid)
+            if (!is2FaTokenValid)
             {
                 ModelState.AddModelError("Input.Code", "Verification code is invalid.");
                 await LoadSharedKeyAndQrCodeUriAsync(user);
@@ -135,7 +135,7 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
                 MinimumLength = 6)]
             [DataType(DataType.Text)]
             [Display(Name = "Verification Code")]
-            public string Code { get; set; }
+            public string Code { get; init; }
         }
     }
 }

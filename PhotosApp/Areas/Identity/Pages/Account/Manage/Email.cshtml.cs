@@ -128,7 +128,7 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
             [Required]
             [EmailAddress]
             [Display(Name = "New email")]
-            public string NewEmail { get; set; }
+            public string NewEmail { get; init; }
         }
     }
 }

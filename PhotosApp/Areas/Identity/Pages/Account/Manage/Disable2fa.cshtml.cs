@@ -8,14 +8,14 @@ using PhotosApp.Areas.Identity.Data;
 
 namespace PhotosApp.Areas.Identity.Pages.Account.Manage
 {
-    public class Disable2faModel : PageModel
+    public class Disable2FaModel : PageModel
     {
-        private readonly ILogger<Disable2faModel> _logger;
+        private readonly ILogger<Disable2FaModel> _logger;
         private readonly UserManager<PhotosAppUser> _userManager;
 
-        public Disable2faModel(
+        public Disable2FaModel(
             UserManager<PhotosAppUser> userManager,
-            ILogger<Disable2faModel> logger)
+            ILogger<Disable2FaModel> logger)
         {
             _userManager = userManager;
             _logger = logger;
@@ -40,8 +40,8 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
 
-            var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
-            if (!disable2faResult.Succeeded)
+            var disable2FaResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
+            if (!disable2FaResult.Succeeded)
                 throw new InvalidOperationException(
                     $"Unexpected error occurred disabling 2FA for user with ID '{_userManager.GetUserId(User)}'.");
 

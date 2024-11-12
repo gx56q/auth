@@ -17,35 +17,22 @@ namespace PhotosApp.Data
     {
         public static void PrepareData(this IHost host)
         {
-            using (var scope = host.Services.CreateScope())
+            using var scope = host.Services.CreateScope();
+            try
             {
-                try
-                {
-                    var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-                    if (env.IsDevelopment())
-                    {
-                        scope.ServiceProvider.GetRequiredService<PhotosDbContext>().Database.Migrate();
-                        // scope.ServiceProvider.GetRequiredService<UsersDbContext>().Database.Migrate();
-                        // scope.ServiceProvider.GetRequiredService<TicketsDbContext>().Database.Migrate();
+                var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+                if (!env.IsDevelopment()) return;
+                scope.ServiceProvider.GetRequiredService<PhotosDbContext>().Database.Migrate();
+                // scope.ServiceProvider.GetRequiredService<UsersDbContext>().Database.Migrate();
+                // scope.ServiceProvider.GetRequiredService<TicketsDbContext>().Database.Migrate();
 
-                        var photosDbContext = scope.ServiceProvider.GetRequiredService<PhotosDbContext>();
-                        photosDbContext.SeedWithSamplePhotosAsync().Wait();
-
-                        // var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                        // roleManager.SeedWithSampleRolesAsync().Wait();
-
-                        // var userManager = scope.ServiceProvider.GetRequiredService<UserManager<PhotosAppUser>>();
-                        // userManager.SeedWithSampleUsersAsync().Wait();
-
-                        // var ticketsDbContext = scope.ServiceProvider.GetRequiredService<TicketsDbContext>();
-                        // ticketsDbContext.SeedWithSampleTicketsAsync().Wait();
-                    }
-                }
-                catch (Exception e)
-                {
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(e, "An error occurred while migrating or seeding the database.");
-                }
+                var photosDbContext = scope.ServiceProvider.GetRequiredService<PhotosDbContext>();
+                photosDbContext.SeedWithSamplePhotosAsync().Wait();
+            }
+            catch (Exception e)
+            {
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogError(e, "An error occurred while migrating or seeding the database.");
             }
         }
 
@@ -210,7 +197,6 @@ namespace PhotosApp.Data
 
         private static async Task SeedWithSampleRolesAsync(this RoleManager<IdentityRole> roleManager)
         {
-            // NOTE: ToList важен, так как при удалении роли меняется список ролей
             foreach (var role in roleManager.Roles.ToList())
                 await roleManager.DeleteAsync(role);
 

@@ -67,7 +67,7 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
         {
             [Required]
             [DataType(DataType.Password)]
-            public string Password { get; set; }
+            public string Password { get; init; }
         }
     }
 }

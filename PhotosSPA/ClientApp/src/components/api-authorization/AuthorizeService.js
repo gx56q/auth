@@ -20,10 +20,11 @@ export class AuthorizeService {
         return !!user;
     }
 
-    async getUser() {
-        if (this._user && this._user.profile) {
-            return this._user.profile;
-        }
+    await this.ensureUserManagerInitialized();
+    const user = await this.userManager.getUser();
+    const accessTokenExpired = !user || typeof user.expired !== "boolean" || user.expired;
+    return user && !accessTokenExpired ? user.profile : null;
+  }
 
         await this.ensureUserManagerInitialized();
         const user = await this.userManager.getUser();
@@ -207,7 +208,17 @@ export class AuthorizeService {
             prefix: ApplicationName,
         });
 
-        this.userManager = new UserManager(settings);
+    this.userManager.events.addUserSignedOut(async () => {
+      await this.userManager.removeUser();
+      this.updateState(undefined);
+    });
+
+    this.userManager.events.addAccessTokenExpired(async () => {
+      if (this._user !== undefined) {
+        this.updateState(undefined);
+      }
+    });
+  }
 
         this.userManager.events.addUserSignedOut(async () => {
             await this.userManager.removeUser();

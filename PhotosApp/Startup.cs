@@ -1,6 +1,9 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
 using PhotosApp.Clients;
 using PhotosApp.Clients.Models;
 using PhotosApp.Data;
@@ -24,35 +26,27 @@ namespace PhotosApp
     {
         public Startup(IWebHostEnvironment env, IConfiguration configuration)
         {
-            this.env = env;
-            this.configuration = configuration;
+            Env = env;
+            Configuration = configuration;
         }
 
-        private IWebHostEnvironment env { get; }
-        private IConfiguration configuration { get; }
+        private IWebHostEnvironment Env { get; }
+        private IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<PhotosServiceOptions>(configuration.GetSection("PhotosService"));
+            services.Configure<PhotosServiceOptions>(Configuration.GetSection("PhotosService"));
 
             var mvc = services.AddControllersWithViews();
             services.AddRazorPages();
-            if (env.IsDevelopment())
+            if (Env.IsDevelopment())
                 mvc.AddRazorRuntimeCompilation();
-
-            // NOTE: Подключение IHttpContextAccessor, чтобы можно было получать HttpContext там,
-            // где это не получается сделать более явно.
+            
             services.AddHttpContextAccessor();
 
-            var connectionString = configuration.GetConnectionString("PhotosDbContextConnection")
+            var connectionString = Configuration.GetConnectionString("PhotosDbContextConnection")
                                    ?? "Data Source=PhotosApp.db";
             services.AddDbContext<PhotosDbContext>(o => o.UseSqlite(connectionString));
-            // NOTE: Вместо Sqlite можно использовать LocalDB от Microsoft или другой SQL Server
-            //services.AddDbContext<PhotosDbContext>(o =>
-            //    o.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=PhotosApp;Trusted_Connection=True;"));
-
-            // services.AddScoped<IPhotosRepository, LocalPhotosRepository>();
             services.AddScoped<IPhotosRepository, RemotePhotosRepository>();
 
             services.AddAutoMapper(cfg =>
@@ -64,7 +58,7 @@ namespace PhotosApp
                     .ForMember(m => m.FileName, options => options.Ignore())
                     .ForMember(m => m.Id, options => options.Ignore())
                     .ForMember(m => m.OwnerId, options => options.Ignore());
-            }, new Assembly[0]);
+            }, Array.Empty<Assembly>());
 
             services.AddTransient<ICookieManager, ChunkingCookieManager>();
 
@@ -85,7 +79,6 @@ namespace PhotosApp
                     options.ClientSecret = "secret";
                     options.ResponseType = "code";
 
-                    // NOTE: oidc и profile уже добавлены по умолчанию
                     options.Scope.Add("email");
                     options.Scope.Add("photos_app");
                     options.Scope.Add("photos");
@@ -109,17 +102,15 @@ namespace PhotosApp
                             var tokenResponse = context.TokenEndpointResponse;
                             var tokenHandler = new JwtSecurityTokenHandler();
 
-                            SecurityToken accessToken = null;
                             if (tokenResponse.AccessToken != null)
-                                accessToken = tokenHandler.ReadToken(tokenResponse.AccessToken);
+                                tokenHandler.ReadToken(tokenResponse.AccessToken);
 
-                            SecurityToken idToken = null;
-                            if (tokenResponse.IdToken != null) idToken = tokenHandler.ReadToken(tokenResponse.IdToken);
+                            if (tokenResponse.IdToken != null) tokenHandler.ReadToken(tokenResponse.IdToken);
 
-                            string refreshToken = null;
                             if (tokenResponse.RefreshToken != null)
                                 // NOTE: Это не JWT-токен
-                                refreshToken = tokenResponse.RefreshToken;
+                            {
+                            }
 
                             return Task.CompletedTask;
                         },
@@ -194,7 +185,7 @@ namespace PhotosApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
+            if (Env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             else
                 app.UseExceptionHandler("/Exception");

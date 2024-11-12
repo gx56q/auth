@@ -10,7 +10,7 @@ namespace PhotosService.Services
 {
     public static class SignedUrlHelpers
     {
-        private static readonly Lazy<string> privateKeyXmlString = new(LoadPrivateKeyXmlString);
+        private static readonly Lazy<string> PrivateKeyXmlString = new(LoadPrivateKeyXmlString);
 
         private static readonly DateTime UnixTimeStart = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -28,7 +28,7 @@ namespace PhotosService.Services
             var queryStringCollection = HttpUtility.ParseQueryString(urlBuilder.Query);
             queryStringCollection.Add("policy", policyUrlSafeString);
             queryStringCollection.Add("signature", signatureUrlSafeString);
-            urlBuilder.Query = queryStringCollection.ToString();
+            urlBuilder.Query = queryStringCollection.ToString()!;
 
             return urlBuilder.ToString();
         }
@@ -47,7 +47,7 @@ namespace PhotosService.Services
 
             queryStringCollection.Remove("policy");
             queryStringCollection.Remove("signature");
-            urlBuilder.Query = queryStringCollection.ToString();
+            urlBuilder.Query = queryStringCollection.ToString()!;
             var resourceUrl = urlBuilder.ToString();
 
             var nowTimestamp = ToUnixTimestamp(DateTime.UtcNow);
@@ -84,14 +84,14 @@ namespace PhotosService.Services
 
         private static byte[] CreateSignedHash(byte[] content)
         {
-            byte[] hash = null;
-            using (var cryptoSHA1 = new SHA1CryptoServiceProvider())
+            byte[] hash;
+            using (var cryptoSha1 = new SHA1CryptoServiceProvider())
             {
-                hash = cryptoSHA1.ComputeHash(content);
+                hash = cryptoSha1.ComputeHash(content);
             }
 
             var rsaProvider = new RSACryptoServiceProvider();
-            rsaProvider.FromXmlString(privateKeyXmlString.Value);
+            rsaProvider.FromXmlString(PrivateKeyXmlString.Value);
 
             var rsaFormatter = new RSAPKCS1SignatureFormatter(rsaProvider);
             rsaFormatter.SetHashAlgorithm("SHA1");
@@ -148,9 +148,9 @@ namespace PhotosService.Services
 
         private class SignedUrlPolicy
         {
-            public string ResourceUrl { get; set; }
-            public int StartTimestamp { get; set; }
-            public int EndTimestamp { get; set; }
+            public string ResourceUrl { get; init; }
+            public int StartTimestamp { get; init; }
+            public int EndTimestamp { get; init; }
         }
     }
 }

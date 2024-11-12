@@ -79,7 +79,7 @@ namespace PhotosApp.Areas.Identity.Pages.Account.Manage
         {
             [Phone]
             [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
+            public string PhoneNumber { get; init; }
         }
     }
 }

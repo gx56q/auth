@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -17,21 +18,29 @@ namespace PhotosService
 {
     public class Startup
     {
-        public Startup(IWebHostEnvironment env, IConfiguration configuration)
+        public Startup(IConfiguration configuration)
         {
-            this.env = env;
-            this.configuration = configuration;
+            Configuration = configuration;
         }
 
-        private IWebHostEnvironment env { get; }
-        private IConfiguration configuration { get; }
+        private IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.WithOrigins("https://localhost:8001")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
+            
             services.AddControllers(options =>
                 {
                     options.ReturnHttpNotAcceptable = true;
-                    // NOTE: Существенно, что новый провайдер добавляется в начало списка перед провайдером по умолчанию
                     options.ModelBinderProviders.Insert(0, new JwtSecurityTokenModelBinderProvider());
                 })
                 .AddNewtonsoftJson(options =>
@@ -39,13 +48,13 @@ namespace PhotosService
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 });
 
-            var connectionString = configuration.GetConnectionString("PhotosDbContextConnection")
+            var connectionString = Configuration.GetConnectionString("PhotosDbContextConnection")
                                    ?? "Data Source=PhotosService.db";
             services.AddDbContext<PhotosDbContext>(o => o.UseSqlite(connectionString));
 
             services.AddScoped<IPhotosRepository, LocalPhotosRepository>();
 
-            services.AddAutoMapper(cfg => { cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap(); }, new Assembly[0]);
+            services.AddAutoMapper(cfg => { cfg.CreateMap<PhotoEntity, PhotoDto>().ReverseMap(); }, Array.Empty<Assembly>());
 
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
@@ -83,6 +92,7 @@ namespace PhotosService
             app.UseSerilogRequestLogging();
 
             app.UseRouting();
+            app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

@@ -11,10 +11,7 @@ namespace PhotosService.Services
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (context.Metadata.ModelType == typeof(JwtSecurityToken))
-                return new JwtSecurityTokenModelBinder();
-
-            return null;
+            return context.Metadata.ModelType == typeof(JwtSecurityToken) ? new JwtSecurityTokenModelBinder() : null;
         }
     }
 }

@@ -9,11 +9,11 @@ namespace PhotosApp.Data
 {
     public class LocalPhotosRepository : IPhotosRepository, IDisposable
     {
-        private PhotosDbContext dbContext;
+        private PhotosDbContext _dbContext;
 
         public LocalPhotosRepository(PhotosDbContext dbContext)
         {
-            this.dbContext = dbContext;
+            _dbContext = dbContext;
         }
 
         public void Dispose()
@@ -24,19 +24,19 @@ namespace PhotosApp.Data
 
         public async Task<IEnumerable<PhotoEntity>> GetPhotosAsync(string ownerId)
         {
-            return await dbContext.Photos
+            return await _dbContext.Photos
                 .Where(i => i.OwnerId == ownerId)
                 .OrderBy(i => i.Title).ToListAsync();
         }
 
         public async Task<PhotoEntity> GetPhotoMetaAsync(Guid id)
         {
-            return await dbContext.Photos.FirstOrDefaultAsync(p => p.Id == id);
+            return await _dbContext.Photos.FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<PhotoContent> GetPhotoContentAsync(Guid id)
         {
-            var entity = await dbContext.Photos.FirstOrDefaultAsync(p => p.Id == id);
+            var entity = await _dbContext.Photos.FirstOrDefaultAsync(p => p.Id == id);
             if (entity == null)
                 return null;
 
@@ -63,20 +63,20 @@ namespace PhotosApp.Data
                 OwnerId = ownerId,
                 FileName = fileName
             };
-            await dbContext.Photos.AddAsync(entity);
-            return await dbContext.SaveChangesAsync() >= 0;
+            await _dbContext.Photos.AddAsync(entity);
+            return await _dbContext.SaveChangesAsync() >= 0;
         }
 
         public async Task<bool> UpdatePhotoAsync(PhotoEntity photo)
         {
-            dbContext.Photos.Update(photo);
-            return await dbContext.SaveChangesAsync() >= 0;
+            _dbContext.Photos.Update(photo);
+            return await _dbContext.SaveChangesAsync() >= 0;
         }
 
         public async Task<bool> DeletePhotoAsync(PhotoEntity photo)
         {
-            dbContext.Photos.Remove(photo);
-            return await dbContext.SaveChangesAsync() >= 0;
+            _dbContext.Photos.Remove(photo);
+            return await _dbContext.SaveChangesAsync() >= 0;
         }
 
         private async Task<string> SavePhotoContentAsync(byte[] content)
@@ -91,10 +91,10 @@ namespace PhotosApp.Data
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
-                if (dbContext != null)
+                if (_dbContext != null)
                 {
-                    dbContext.Dispose();
-                    dbContext = null;
+                    _dbContext.Dispose();
+                    _dbContext = null;
                 }
         }
 
